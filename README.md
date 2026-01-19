@@ -1,5 +1,19 @@
 # Vite Plugin Version Bumper
 
+<div align="center">
+
+[![NPM Version](https://img.shields.io/npm/v/vite-plugin-version-bumper?color=blue&style=flat-square)](https://www.npmjs.com/package/vite-plugin-version-bumper)
+[![License](https://img.shields.io/npm/l/vite-plugin-version-bumper?style=flat-square)](LICENSE)
+[![Downloads](https://img.shields.io/npm/dt/vite-plugin-version-bumper?style=flat-square)](https://www.npmjs.com/package/vite-plugin-version-bumper)
+[![TypeScript](https://img.shields.io/badge/Written%20in-TypeScript-3178C6?style=flat-square)](https://www.typescriptlang.org/)
+
+**Automate your cache busting strategy with zero config.**
+Updates version suffixes in your code (e.g., `_v1` → `_v2`) physically during the build.
+
+[Installation](#-installation) • [Usage](#-usage) • [Configuration](#-configuration)
+
+</div>
+
 A Vite plugin that automatically bumps version numbers in your source code files during the build process. Perfect for **cache busting**, managing **localStorage keys**, or updating **display versions**.
 
 ## 🚀 Features

@@ -31,7 +31,7 @@ export default function versionBumper(options: BumperOptions): Plugin {
         return;
       }
 
-      console.log("\n🚀 [Version Bumper] Tarama başlatılıyor...");
+      console.log("\n🚀 [Version Bumper] Looking for version patterns...");
 
       const filePaths = globSync(files, { absolute: true });
       let totalChanges = 0;
@@ -78,10 +78,10 @@ export default function versionBumper(options: BumperOptions): Plugin {
 
       if (totalChanges > 0) {
         console.log(
-          `✅ [Version Bumper] Toplam ${totalChanges} dosya güncellendi.\n`,
+          `✅ [Version Bumper] Total ${totalChanges} files updated.\n`,
         );
       } else {
-        console.log(`⚠️ [Version Bumper] Değiştirilecek pattern bulunamadı.\n`);
+        console.log(`⚠️ [Version Bumper] No patterns found to update.\n`);
       }
     },
   };
