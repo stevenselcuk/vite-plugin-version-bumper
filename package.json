@@ -1,12 +1,12 @@
 {
   "name": "vite-plugin-version-bumper",
-  "version": "1.0.0",
-  "description": "A Vite plugin to bump version suffixes in source code.",
+  "version": "1.0.3",
+  "description": "(Not fully) A Vite plugin to bump version suffixes in source code.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "bin": {
-    "vite-bumper": "./bin/cli.mjs"
+    "vite-bumper": "./dist/cli.js"
   },
   "exports": {
     ".": {

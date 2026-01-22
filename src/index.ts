@@ -1,88 +1,73 @@
-import { globSync } from "glob";
-import fs from "node:fs";
-import path from "node:path";
-import type { Plugin } from "vite";
+import { globSync } from 'glob';
+import fs from 'node:fs';
+import path from 'node:path';
+import type { Plugin } from 'vite';
 
-interface BumperOptions {
+export interface BumperOptions {
   files: string | string[];
-
   pattern?: RegExp;
 }
 
-export default function versionBumper(options: BumperOptions): Plugin {
+
+export function runBump(options: BumperOptions, flags: { bump?: boolean; fresh?: boolean }) {
   const { files, pattern = /(_v)(\d+)/g } = options;
+  const { bump, fresh } = flags;
 
-  return {
-    name: "vite-plugin-version-bumper",
-    apply: "build",
+  if (!bump && !fresh) return; 
 
-    buildStart() {
-      const args = process.argv;
-      const env = process.env;
+  console.log('\n🚀 [Version Bumper] Scanning files...');
 
-      const shouldIncrease =
-        args.includes("--increase") ||
-        args.includes("--bump") ||
-        env.BUMP === "true";
+  const filePaths = globSync(files, { absolute: true });
+  let totalChanges = 0;
 
-      const shouldFresh = args.includes("--fresh") || env.FRESH === "true";
+  for (const filePath of filePaths) {
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      let hasChange = false;
 
-      if (!shouldIncrease && !shouldFresh) {
-        return;
-      }
+      const newContent = content.replace(pattern, (match, prefix, versionStr) => {
+        const currentVer = parseInt(versionStr, 10);
+        let newVer = currentVer;
 
-      console.log("\n🚀 [Version Bumper] Looking for version patterns...");
+        if (fresh) newVer = 1;
+        else if (bump) newVer = currentVer + 1;
 
-      const filePaths = globSync(files, { absolute: true });
-      let totalChanges = 0;
-
-      for (const filePath of filePaths) {
-        try {
-          const content = fs.readFileSync(filePath, "utf-8");
-          let hasChange = false;
-
-          const newContent = content.replace(
-            pattern,
-            (match, prefix, versionStr) => {
-              const currentVer = parseInt(versionStr, 10);
-              let newVer = currentVer;
-
-              if (shouldFresh) {
-                newVer = 1;
-              } else if (shouldIncrease) {
-                newVer = currentVer + 1;
-              }
-
-              if (newVer !== currentVer) {
-                hasChange = true;
-
-                const fileName = path.basename(filePath);
-                console.log(
-                  `   Update ${fileName}: ${match} -> ${prefix}${newVer}`,
-                );
-                return `${prefix}${newVer}`;
-              }
-
-              return match;
-            },
-          );
-
-          if (hasChange) {
-            fs.writeFileSync(filePath, newContent, "utf-8");
-            totalChanges++;
-          }
-        } catch (error) {
-          console.error(`Error reading/writing file: ${filePath}`, error);
+        if (newVer !== currentVer) {
+          hasChange = true;
+          console.log(`   Update ${path.basename(filePath)}: ${match} -> ${prefix}${newVer}`);
+          return `${prefix}${newVer}`;
         }
-      }
+        return match;
+      });
 
-      if (totalChanges > 0) {
-        console.log(
-          `✅ [Version Bumper] Total ${totalChanges} files updated.\n`,
-        );
-      } else {
-        console.log(`⚠️ [Version Bumper] No patterns found to update.\n`);
+      if (hasChange) {
+        fs.writeFileSync(filePath, newContent, 'utf-8');
+        totalChanges++;
       }
-    },
+    } catch (error) {
+      console.error(`Error processing file: ${filePath}`, error);
+    }
+  }
+
+  if (totalChanges > 0) {
+    console.log(`✅ [Version Bumper] Updated ${totalChanges} files.\n`);
+  } else {
+    console.log(`⚠️ [Version Bumper] No matching patterns found.\n`);
+  }
+}
+
+
+export default function versionBumper(options: BumperOptions): Plugin {
+  return {
+    name: 'vite-plugin-version-bumper',
+    apply: 'build',
+    buildStart() {
+      
+      const args = process.argv;
+      const bump = args.includes('--bump') || process.env.BUMP === 'true';
+      const fresh = args.includes('--fresh') || process.env.FRESH === 'true';
+      
+      runBump(options, { bump, fresh });
+    }
   };
 }
